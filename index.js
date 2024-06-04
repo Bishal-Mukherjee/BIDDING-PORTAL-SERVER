@@ -14,6 +14,10 @@ server.use(express.json({ extended: false }));
 initializeFirebaseAdmin();
 initializeMongoose();
 
+server.get("/", (req, res) => {
+  res.send("SERVER WORKING");
+});
+
 server.use("/api/client", require("./routes/client"));
 
 const PORT = process.env.PORT || 8080;
