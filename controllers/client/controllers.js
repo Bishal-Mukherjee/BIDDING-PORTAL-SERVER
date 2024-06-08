@@ -1,6 +1,8 @@
 const { compactUUID } = require("../../utils/stringUtils");
 const Task = require("../../models/tasks");
 
+/* desc: Retrieves tasks created by the logged in user */
+// route: GET /api/client/getAllTask
 exports.getAllTask = async (req, res) => {
   const { email } = req.user;
 
@@ -21,6 +23,8 @@ exports.getAllTask = async (req, res) => {
   }
 };
 
+/* desc: Retrieves a specific task by its taskId */
+// route: GET /api/client/getTask/:taskId
 exports.getTaskById = async (req, res) => {
   const { taskId } = req.params;
 
@@ -36,11 +40,14 @@ exports.getTaskById = async (req, res) => {
   }
 };
 
+/* desc: Creates a new task */
+// route: POST /api/client/createTask
+// body: { title, description, images, address }
 exports.createTask = async (req, res) => {
   const { firstName, lastName, email } = req.user;
-  const { title, description, images } = req.body;
+  const { title, description, images, address } = req.body;
 
-  if (!title) {
+  if (!title || !address) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -55,6 +62,7 @@ exports.createTask = async (req, res) => {
       name: `${firstName} ${lastName}`,
       email,
       images,
+      address,
     });
 
     await task.save();
@@ -68,6 +76,8 @@ exports.createTask = async (req, res) => {
   }
 };
 
+/* desc: Deletes a specific task by its taskId */
+// route: DELETE /api/client/deleteTask/:taskId
 exports.deleteTask = async (req, res) => {
   const { taskId } = req.params;
 
@@ -80,6 +90,9 @@ exports.deleteTask = async (req, res) => {
   }
 };
 
+/* desc: Updates a specific task by its taskId */
+// route: PUT /api/client/updateTask/:taskId
+// body: { title, description, images }
 exports.updateTask = async (req, res) => {
   const { taskId } = req.params;
   const { title, description, images } = req.body;

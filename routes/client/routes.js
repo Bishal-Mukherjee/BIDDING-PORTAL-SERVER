@@ -9,14 +9,14 @@ const {
 } = require("../../controllers/client");
 const { auth } = require("../../middlewares/auth");
 
-router.get("/getAllTask", auth, getAllTask);
+router.get("/getAllTask", auth("CLIENT"), getAllTask);
 
-router.post("/createTask", auth, createTask);
+router.post("/createTask", auth("CLIENT"), createTask);
 
-router.get("/getTask/:taskId", auth, getTaskById);
+router.get("/getTask/:taskId", auth("CLIENT"), getTaskById);
 
-router.put("/updateTask/:taskId", auth, updateTask);
+router.delete("/deleteTask/:taskId", auth("CLIENT"), deleteTask);
 
-router.delete("/deleteTask/:taskId", auth, deleteTask);
+router.put("/updateTask/:taskId", auth("CLIENT"), updateTask);
 
 module.exports = router;

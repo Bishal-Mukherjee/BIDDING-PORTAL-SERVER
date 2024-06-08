@@ -27,6 +27,15 @@ const taskSchema = new mongoose.Schema({
     required: true,
     match: [/.+\@.+\..+/, "Please enter a valid email address"],
   },
+  address: {
+    type: {
+      street: String,
+      apartment: String,
+      city: String,
+      state: String,
+      zip: String,
+    },
+  },
   createdAt: {
     type: Date,
     default: Date.now,
