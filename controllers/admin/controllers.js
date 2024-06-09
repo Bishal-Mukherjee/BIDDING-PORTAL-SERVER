@@ -99,7 +99,7 @@ exports.updateSelectBid = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    const bid = await Bid.find({ id: bidId });
+    const bid = await Bid.findOne({ id: bidId });
 
     if (!bid) {
       return res.status(404).json({ message: "Bid not found" });
@@ -114,7 +114,7 @@ exports.updateSelectBid = async (req, res) => {
 
     await Task.updateOne(
       { id: taskId },
-      { $set: { assignedTo: bid.bidder.email, status: "assigned" } }
+      { $set: { assignedTo: bid.bidder.name, status: "assigned" } }
     );
 
     return res.status(200).json({ message: "Bid selected successfully" });
