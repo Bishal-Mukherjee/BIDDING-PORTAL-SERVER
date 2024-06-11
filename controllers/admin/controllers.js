@@ -89,6 +89,26 @@ exports.updateTaskStatus = async (req, res) => {
   }
 };
 
+/* @desc:  Updates the isActive of a task in the database. */
+// @route: PUT /api/admin/updateActivateTask/:taskId
+exports.updateActivateTask = async (req, res) => {
+  const { taskId } = req.params;
+  try {
+    const task = await Task.findOne({ id: taskId }).select("-_id");
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    await Task.updateOne(
+      { id: taskId },
+      { $set: { isActive: true, activationDate: new Date() } }
+    );
+    return res.status(200).json({ message: "Task activated successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to activate task" });
+  }
+};
+
 /* @desc: Selects a bid for a task, marking it as "accepted" and 
    rejecting all other bids for that task. */
 // @route: PUT /api/admin/updateSelectBid/:taskId/:bidId

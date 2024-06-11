@@ -12,14 +12,15 @@ exports.getTasks = async (req, res) => {
 
   try {
     if (status === "created") {
-      // gets those tasks created in the last 72 hours, where no bids have been placed
+      // gets those tasks that are activated in the last 72 hours, where no bids have been placed
       const seventyTwoHoursAgo = dayjs().subtract(72, "hour").toDate();
 
       tasks = await Task.aggregate([
         {
           $match: {
             status,
-            createdAt: { $lte: seventyTwoHoursAgo },
+            isActive: true,
+            activationDate: { $lte: seventyTwoHoursAgo },
           },
         },
         {

@@ -101,24 +101,27 @@ exports.updateTask = async (req, res) => {
     const task = await Task.findOne({ id: taskId });
     const updateFields = {};
 
-    if (title) {
-      updateFields.title = title;
-    }
+    if (!task.isActive) {
+      if (title) {
+        updateFields.title = title;
+      }
 
-    if (description) {
-      updateFields.description = description;
-    }
+      if (description) {
+        updateFields.description = description;
+      }
 
-    if (images && images.length > 0) {
-      updateFields.images = [...task.images, ...images];
-    }
+      if (images && images.length > 0) {
+        updateFields.images = [...task.images, ...images];
+      }
 
-    if (Object.keys(updateFields).length > 0) {
-      await Task.updateOne({ id: taskId }, { $set: updateFields });
-      return res.status(200).json({ message: "Task updated successfully" });
-    } else {
-      return res.status(400).json({ message: "No fields to update" });
+      if (Object.keys(updateFields).length > 0) {
+        await Task.updateOne({ id: taskId }, { $set: updateFields });
+        return res.status(200).json({ message: "Task updated successfully" });
+      } else {
+        return res.status(400).json({ message: "No fields to update" });
+      }
     }
+    return res.status(400).json({ message: "Failed to update.Task is active" });
   } catch (err) {
     console.error("Error updating task:", err);
     return res.status(500).json({ message: "Failed to update task" });

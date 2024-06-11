@@ -18,6 +18,13 @@ const taskSchema = new mongoose.Schema({
     enum: ["created", "assigned", "in-progress", "completed"],
     default: "created",
   },
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
+  activationDate: {
+    type: Date,
+  },
   name: {
     type: String,
     required: true,
