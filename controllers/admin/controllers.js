@@ -6,8 +6,11 @@ const Bid = require("../../models/bids");
    them in a sorted order based on creation date. */
 // @route: GET /api/admin/getAllTask
 exports.getAllTask = async (req, res) => {
+  const { status = "created" } = req.query;
+
   try {
     const tasks = await Task.aggregate([
+      { $match: { status } },
       { $addFields: { images: { $size: "$images" } } },
       { $sort: { createdAt: -1 } },
       { $project: { _id: 0, __v: 0 } },
@@ -119,25 +122,29 @@ exports.updateSelectBid = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    const bid = await Bid.findOne({ id: bidId });
 
-    if (!bid) {
-      return res.status(404).json({ message: "Bid not found" });
+    if (!task.assignedTo) {
+      const bid = await Bid.findOne({ id: bidId });
+
+      if (!bid) {
+        return res.status(404).json({ message: "Bid not found" });
+      }
+
+      await Bid.updateOne({ id: bidId }, { $set: { status: "accepted" } });
+
+      await Bid.updateMany(
+        { taskId: taskId, id: { $ne: bidId } },
+        { $set: { status: "rejected" } }
+      );
+
+      await Task.updateOne(
+        { id: taskId },
+        { $set: { assignedTo: bid.bidder.name, status: "assigned" } }
+      );
+
+      return res.status(200).json({ message: "Bid selected successfully" });
     }
-
-    await Bid.updateOne({ id: bidId }, { $set: { status: "accepted" } });
-
-    await Bid.updateMany(
-      { taskId: taskId, id: { $ne: bidId } },
-      { $set: { status: "rejected" } }
-    );
-
-    await Task.updateOne(
-      { id: taskId },
-      { $set: { assignedTo: bid.bidder.name, status: "assigned" } }
-    );
-
-    return res.status(200).json({ message: "Bid selected successfully" });
+    return res.status(400).json({ message: "Task already assigned" });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to select bid" });
