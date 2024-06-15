@@ -34,7 +34,11 @@ exports.getTasks = async (req, res) => {
         },
         {
           $match: {
-            "bid.0": { $exists: false },
+            $expr: {
+              $not: {
+                $in: [email, "$bid.bidder.email"],
+              },
+            },
           },
         },
         { $addFields: { images: { $size: "$images" } } },
