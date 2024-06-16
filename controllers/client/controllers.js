@@ -121,7 +121,7 @@ exports.updateTask = async (req, res) => {
       }
 
       if (images && images.length > 0) {
-        updateFields.images = [...task.images, ...images];
+        updateFields.images = images;
       }
 
       if (Object.keys(updateFields).length > 0) {
