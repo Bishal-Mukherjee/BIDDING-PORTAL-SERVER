@@ -1,6 +1,7 @@
 const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
+const { auth, firestore } = require("firebase-admin");
 
 /* @desc:  Retrieves all tasks from the database and returns
    them in a sorted order based on creation date. */
@@ -67,6 +68,46 @@ exports.getRecentTasks = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to get tasks" });
+  }
+};
+
+/* desc: Updates a specific task by its taskId */
+// route: PUT /api/admin/updateTask/:taskId
+// body: { title, description, images }
+exports.updateTask = async (req, res) => {
+  const { taskId } = req.params;
+  const { title, description, images } = req.body;
+
+  try {
+    const task = await Task.findOne({ id: taskId });
+    const updateFields = {};
+
+    if (!task.isActive) {
+      if (title) {
+        updateFields.title = title;
+      }
+
+      if (description) {
+        updateFields.description = description;
+      }
+
+      if (images && images.length > 0) {
+        updateFields.images = images;
+      }
+
+      if (Object.keys(updateFields).length > 0) {
+        await Task.updateOne({ id: taskId }, { $set: updateFields });
+        return res.status(200).json({ message: "Task updated successfully" });
+      } else {
+        return res.status(400).json({ message: "No fields to update" });
+      }
+    }
+    return res
+      .status(400)
+      .json({ message: "Failed to update. Task is active" });
+  } catch (err) {
+    console.error("Error updating task:", err);
+    return res.status(500).json({ message: "Failed to update task" });
   }
 };
 
@@ -148,5 +189,25 @@ exports.updateSelectBid = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to select bid" });
+  }
+};
+
+exports.postCreateClient = async (req, res) => {
+  const { email, password, firstName, lastName, phoneNumber } = req.body;
+
+  try {
+    const userData = {
+      email,
+      password,
+      firstName,
+      lastName,
+      phoneNumber,
+      designation: "CLIENT",
+    };
+    await auth().createUser(userData);
+    return res.status(200).json({ message: "User created successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to create user" });
   }
 };

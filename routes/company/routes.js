@@ -7,6 +7,7 @@ const {
   createBid,
   markInProgress,
   postAcceptOrRejectTask,
+  getTaskAcceptances,
 } = require("../../controllers/company");
 
 router.get("/getTasks", auth("COMPANY"), getTasks);
@@ -22,5 +23,7 @@ router.put(
   auth("COMPANY"),
   postAcceptOrRejectTask
 );
+
+router.get("/getRecentTaskAcceptances", auth("COMPANY"), getTaskAcceptances);
 
 module.exports = router;

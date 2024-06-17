@@ -7,7 +7,7 @@ const TaskAcceptance = require("../../models/task-acceptance");
 /* @desc:  Retrieves tasks based on status. */
 // @route: GET /api/company/getTasks?status="created"|"assigned"|"in-progress"|"completed"
 exports.getTasks = async (req, res) => {
-  const { email } = req.user;
+  const { email, firstName, lastName } = req.user;
   const { status = "created" } = req.query; // status can be 'assigned' / 'in-progress' / 'completed'
   let tasks = [];
 
@@ -16,12 +16,23 @@ exports.getTasks = async (req, res) => {
       // gets those tasks that are activated in the last 72 hours, where no bids have been placed
       const seventyTwoHoursAgo = dayjs().subtract(72, "hour").toDate();
 
+      const rejectedTaskIds = await TaskAcceptance.aggregate([
+        { $match: { company: email, status: "rejected" } },
+        { $project: { _id: 0, taskId: 1, status: 1 } },
+      ]).exec();
+
+      const previouslyRejectedTaskIds = rejectedTaskIds?.map(
+        (task) => task.taskId
+      );
+
       tasks = await Task.aggregate([
         {
           $match: {
             status,
             isActive: true,
             activationDate: { $gte: seventyTwoHoursAgo },
+            assignedTo: null,
+            id: { $nin: previouslyRejectedTaskIds },
           },
         },
         {
@@ -47,15 +58,16 @@ exports.getTasks = async (req, res) => {
       ]).exec();
     } else if (status === "accepted") {
       // can also add ' status === "rejected" ' if needed
-      const acceptanceIds = await TaskAcceptance.aggregate([
+      const acceptedTasksDoc = await TaskAcceptance.aggregate([
         { $match: { company: email, status } },
         { $project: { _id: 0, taskId: 1, status: 1 } },
       ]).exec();
-      if (acceptanceIds) {
-        const ids = acceptanceIds?.map((task) => task.taskId);
-        // tasks = await Task.find({ id: { $in: ids } });
+      if (acceptedTasksDoc) {
+        const ids = acceptedTasksDoc?.map((task) => task.taskId);
+        // query for the tasks which the company has accepted to bid
+        // and also the tasks should not be assigned to any one
         tasks = await Task.aggregate([
-          { $match: { id: { $in: ids } } },
+          { $match: { id: { $in: ids }, assignedTo: "" } },
           { $addFields: { images: { $size: "$images" } } },
           { $sort: { createdAt: -1 } },
           { $project: { _id: 0, email: 0, name: 0, __v: 0 } },
@@ -63,8 +75,9 @@ exports.getTasks = async (req, res) => {
       }
     } else {
       // gets all tasks assigned to the company
+      const name = `${firstName} ${lastName}`;
       tasks = await Task.aggregate([
-        { $match: { assignedTo: email, status } },
+        { $match: { assignedTo: name, status } },
         { $addFields: { images: { $size: "$images" } } },
         { $sort: { createdAt: -1 } },
         { $project: { _id: 0, email: 0, name: 0, __v: 0 } },
@@ -198,5 +211,33 @@ exports.getBidsByTaskId = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to get bids" });
+  }
+};
+
+exports.getTaskAcceptances = async (req, res) => {
+  const { email } = req.user;
+  const seventyTwoHoursAgo = dayjs().subtract(72, "hour").toDate();
+
+  try {
+    const taskAcceptance = await TaskAcceptance.aggregate([
+      {
+        $match: {
+          company: email,
+          status: "accepted",
+          createdAt: { $gte: seventyTwoHoursAgo },
+        },
+      },
+      { $project: { _id: 0, taskId: 1, status: 1 } },
+    ]).exec();
+
+    const taskIds = taskAcceptance.map((task) => task.taskId);
+
+    if (!taskAcceptance) {
+      return res.status(404).json({ message: "Task acceptance not found" });
+    }
+    return res.status(200).json({ results: taskIds });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to get task acceptance" });
   }
 };

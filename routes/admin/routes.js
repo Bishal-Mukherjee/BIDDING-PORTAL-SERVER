@@ -7,9 +7,10 @@ const {
   updateTaskStatus,
   updateSelectBid,
   updateActivateTask,
+  updateTask,
+  postCreateClient,
   //   createTask,
   //   deleteTask,
-  //   updateTask,
 } = require("../../controllers/admin");
 const { auth } = require("../../middlewares/auth");
 
@@ -25,9 +26,11 @@ router.put("/updateSelectBid/:taskId/:bidId", auth("ADMIN"), updateSelectBid);
 
 router.put("/updateActivateTask/:taskId", auth("ADMIN"), updateActivateTask);
 
-// router.post("/createTask", auth("CLIENT"), createTask);
+router.put("/updateTask/:taskId", auth("ADMIN"), updateTask);
 
-// router.put("/updateTask/:taskId", auth("CLIENT"), updateTask);
+router.post("/createClient", auth("ADMIN"), postCreateClient);
+
+// router.post("/createTask", auth("CLIENT"), createTask);
 
 // router.delete("/deleteTask/:taskId", auth("CLIENT"), deleteTask);
 
