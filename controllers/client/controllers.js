@@ -1,5 +1,7 @@
 const { compactUUID } = require("../../utils/stringUtils");
 const Task = require("../../models/tasks");
+const { createNotification } = require("../../notification/controller");
+const { NOTIFICATION_TYPE } = require("../../notification/config");
 
 /* desc: Retrieves tasks created by the logged in user */
 // route: GET /api/client/getAllTask
@@ -67,6 +69,13 @@ exports.createTask = async (req, res) => {
     });
 
     await task.save();
+
+    // create notification for admin
+    createNotification({
+      type: NOTIFICATION_TYPE.TASK_CREATED,
+      title: `${firstName} ${lastName}`,
+      resourceId: id,
+    });
     return res.status(201).json({
       message: "Task created successfully",
       taskId: id,

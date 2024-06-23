@@ -3,6 +3,8 @@ const { compactUUID } = require("../../utils/stringUtils");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
+const { createNotification } = require("../../notification/controller");
+const { NOTIFICATION_TYPE } = require("../../notification/config");
 
 /* @desc:  Retrieves tasks based on status. */
 // @route: GET /api/company/getTasks?status="created"|"assigned"|"in-progress"|"completed"
@@ -192,6 +194,13 @@ exports.createBid = async (req, res) => {
     });
 
     await bid.save();
+
+    // create notification for admin
+    createNotification({
+      type: NOTIFICATION_TYPE.BID_PLACED,
+      title: `${firstName} ${lastName}`,
+      resourceId: taskId,
+    });
     return res.status(200).json({ bid });
   } catch (err) {
     console.log(err);

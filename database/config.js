@@ -9,6 +9,7 @@ exports.initializeFirebaseAdmin = () => {
       privateKey: process.env.PRIVATE_KEY,
       projectId: process.env.PROJECT_ID,
     }),
+    databaseURL: process.env.FIREBASE_DATABASE_URL,
   });
   return admin;
 };
