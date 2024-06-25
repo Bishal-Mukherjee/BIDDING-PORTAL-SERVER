@@ -12,10 +12,21 @@ exports.getAllTask = async (req, res) => {
   try {
     const tasks = await Task.aggregate([
       { $match: { email, status } },
-      { $addFields: { images: { $size: "$images" } } },
+      {
+        $addFields: {
+          previewImage: {
+            $cond: [
+              { $gt: [{ $size: "$images" }, 0] },
+              { $arrayElemAt: ["$images", 0] },
+              "",
+            ],
+          },
+        },
+      },
       { $sort: { createdAt: -1 } },
       { $project: { _id: 0, email: 0, __v: 0 } },
     ]).exec();
+
     if (!tasks) {
       return res.status(404).json({ tasks: [] });
     }
