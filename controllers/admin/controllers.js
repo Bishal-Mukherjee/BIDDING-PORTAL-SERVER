@@ -1,7 +1,7 @@
 const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
-const { auth, firestore } = require("firebase-admin");
+const { auth } = require("firebase-admin");
 
 /* @desc:  Retrieves all tasks from the database and returns
    them in a sorted order based on creation date. */
@@ -12,10 +12,21 @@ exports.getAllTask = async (req, res) => {
   try {
     const tasks = await Task.aggregate([
       { $match: { status } },
-      { $addFields: { images: { $size: "$images" } } },
+      {
+        $addFields: {
+          previewImage: {
+            $cond: [
+              { $gt: [{ $size: "$images" }, 0] },
+              { $arrayElemAt: ["$images", 0] },
+              "",
+            ],
+          },
+        },
+      },
       { $sort: { createdAt: -1 } },
-      { $project: { _id: 0, __v: 0 } },
+      { $project: { _id: 0, __v: 0, images: 0, address: 0 } },
     ]).exec();
+
     if (!tasks) {
       return res.status(404).json({ tasks: [] });
     }

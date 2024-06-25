@@ -54,7 +54,17 @@ exports.getTasks = async (req, res) => {
             },
           },
         },
-        { $addFields: { images: { $size: "$images" } } },
+        {
+          $addFields: {
+            previewImage: {
+              $cond: [
+                { $gt: [{ $size: "$images" }, 0] },
+                { $arrayElemAt: ["$images", 0] },
+                "",
+              ],
+            },
+          },
+        },
         { $sort: { createdAt: -1 } },
         { $project: { _id: 0, email: 0, name: 0, __v: 0, bid: 0 } },
       ]).exec();
@@ -70,7 +80,17 @@ exports.getTasks = async (req, res) => {
         // and also the tasks should not be assigned to any one
         tasks = await Task.aggregate([
           { $match: { id: { $in: ids }, assignedTo: "" } },
-          { $addFields: { images: { $size: "$images" } } },
+          {
+            $addFields: {
+              previewImage: {
+                $cond: [
+                  { $gt: [{ $size: "$images" }, 0] },
+                  { $arrayElemAt: ["$images", 0] },
+                  "",
+                ],
+              },
+            },
+          },
           { $sort: { createdAt: -1 } },
           { $project: { _id: 0, email: 0, name: 0, __v: 0 } },
         ]);
@@ -80,7 +100,17 @@ exports.getTasks = async (req, res) => {
       const name = `${firstName} ${lastName}`;
       tasks = await Task.aggregate([
         { $match: { assignedTo: name, status } },
-        { $addFields: { images: { $size: "$images" } } },
+        {
+          $addFields: {
+            previewImage: {
+              $cond: [
+                { $gt: [{ $size: "$images" }, 0] },
+                { $arrayElemAt: ["$images", 0] },
+                "",
+              ],
+            },
+          },
+        },
         { $sort: { createdAt: -1 } },
         { $project: { _id: 0, email: 0, name: 0, __v: 0 } },
       ]).exec();
