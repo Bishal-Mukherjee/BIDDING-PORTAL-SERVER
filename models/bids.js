@@ -24,6 +24,11 @@ const bidSchema = new mongoose.Schema({
     required: true,
     default: "USD",
   },
+  quality: {
+    type: String,
+    enum: ["good", "better", "best"],
+    default: "good",
+  },
   bidder: {
     type: {
       name: { type: String },

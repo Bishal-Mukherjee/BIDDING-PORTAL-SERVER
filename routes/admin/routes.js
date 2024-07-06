@@ -4,6 +4,7 @@ const {
   getAllTask,
   getTaskById,
   getRecentTasks,
+  createTask,
   updateTaskStatus,
   updateSelectBid,
   updateActivateTask,
@@ -19,6 +20,8 @@ router.get("/getAllTask", auth("ADMIN"), getAllTask);
 router.get("/getTask/:taskId", auth("ADMIN"), getTaskById);
 
 router.get("/getRecentTasks", auth("ADMIN"), getRecentTasks);
+
+router.post("/createTask", auth("ADMIN"), createTask);
 
 router.put("/updateTaskStatus/:taskId", auth("ADMIN"), updateTaskStatus);
 

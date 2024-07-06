@@ -200,7 +200,7 @@ exports.markInProgress = async (req, res) => {
 exports.createBid = async (req, res) => {
   const { taskId } = req.params;
   const { firstName, lastName, email } = req.user;
-  const { amount, attachment } = req.body;
+  const { amount, attachment, quality } = req.body;
   const id = compactUUID();
 
   try {
@@ -218,6 +218,7 @@ exports.createBid = async (req, res) => {
       taskId,
       amount,
       attachment,
+      quality,
       bidder: {
         name: `${firstName} ${lastName}`,
         email,
