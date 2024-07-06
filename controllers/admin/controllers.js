@@ -2,6 +2,7 @@ const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
 const { auth } = require("firebase-admin");
+const { compactUUID } = require("../../utils/stringUtils");
 
 /* @desc:  Retrieves all tasks from the database and returns
    them in a sorted order based on creation date. */
@@ -79,6 +80,51 @@ exports.getRecentTasks = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to get tasks" });
+  }
+};
+
+/* desc: Creates a new task */
+// route: POST /api/admin/createTask
+// body: { firstName, lastName, email, title, description, images, videos,address }
+exports.createTask = async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    title,
+    description,
+    address,
+    images,
+    videos,
+  } = req.body;
+
+  if (!title || !address) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+
+  try {
+    const id = compactUUID();
+
+    const task = new Task({
+      id,
+      title,
+      description,
+      status: "created",
+      name: `${firstName} ${lastName}`,
+      email,
+      address,
+      images,
+      videos,
+    });
+
+    await task.save();
+    return res.status(201).json({
+      message: "Task created successfully",
+      taskId: id,
+    });
+  } catch (error) {
+    console.error("Error creating task:", error);
+    return res.status(500).json({ message: "Failed to create task" });
   }
 };
 

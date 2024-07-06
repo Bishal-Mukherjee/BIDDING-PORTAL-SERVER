@@ -79,7 +79,7 @@ exports.getTasks = async (req, res) => {
         // query for the tasks which the company has accepted to bid
         // and also the tasks should not be assigned to any one
         tasks = await Task.aggregate([
-          { $match: { id: { $in: ids }, assignedTo: "" } },
+          { $match: { id: { $in: ids }, assignedTo: null, status: "created" } },
           {
             $addFields: {
               previewImage: {
@@ -134,7 +134,7 @@ exports.getTaskById = async (req, res) => {
   try {
     const task = await Task.findOne({ id: taskId }).select("-_id");
     // also try to get the relevant bids that were raised on that task, by the company
-    const bid = await Bid.findOne({ taskId, "bidder.email": email })
+    const bids = await Bid.find({ taskId, "bidder.email": email })
       .select("-_id")
       .sort({ amount: 1 });
     const taskAcceptance = await TaskAcceptance.findOne({
@@ -144,7 +144,7 @@ exports.getTaskById = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    return res.status(200).json({ task, bid, taskAcceptance });
+    return res.status(200).json({ task, bids, taskAcceptance });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to get task" });
@@ -200,7 +200,7 @@ exports.markInProgress = async (req, res) => {
 exports.createBid = async (req, res) => {
   const { taskId } = req.params;
   const { firstName, lastName, email } = req.user;
-  const { amount } = req.body;
+  const { amount, attachment, quality } = req.body;
   const id = compactUUID();
 
   try {
@@ -217,6 +217,8 @@ exports.createBid = async (req, res) => {
       id,
       taskId,
       amount,
+      attachment,
+      quality,
       bidder: {
         name: `${firstName} ${lastName}`,
         email,

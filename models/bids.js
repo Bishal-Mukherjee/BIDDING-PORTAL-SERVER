@@ -15,10 +15,19 @@ const bidSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  attachment: {
+    type: String,
+    required: true,
+  },
   currency: {
     type: String,
     required: true,
     default: "USD",
+  },
+  quality: {
+    type: String,
+    enum: ["good", "better", "best"],
+    default: "good",
   },
   bidder: {
     type: {

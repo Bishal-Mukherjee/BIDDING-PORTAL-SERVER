@@ -51,6 +51,10 @@ const taskSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  videos: {
+    type: [String],
+    default: [],
+  },
   assignedTo: {
     type: String,
   },
