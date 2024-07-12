@@ -1,5 +1,6 @@
 const { compactUUID } = require("../../utils/stringUtils");
 const Task = require("../../models/tasks");
+const InterestedClients = require("../../models/interested-clients");
 const { createNotification } = require("../../notification/controller");
 const { NOTIFICATION_TYPE } = require("../../notification/config");
 
@@ -157,5 +158,40 @@ exports.updateTask = async (req, res) => {
   } catch (err) {
     console.error("Error updating task:", err);
     return res.status(500).json({ message: "Failed to update task" });
+  }
+};
+
+/* desc: Registers interested clients */
+// route: POST /api/client/postInterestedClients
+// body: { firstName, lastName, email, phoneNumber, message, postalCode  }
+exports.registerInterestedClient = async (req, res) => {
+  const { firstName, lastName, email, phoneNumber, message, postalCode } =
+    req.body;
+
+  try {
+    const user = await InterestedClients.findOne({ email });
+
+    if (user) {
+      return res.status(200).json({
+        message: "Thank You! We will reach out to you soon",
+      });
+    }
+
+    const newClient = new InterestedClients({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      message,
+      postalCode,
+    });
+
+    await newClient.save();
+    return res.status(200).json({
+      message: "Thank You! We will reach out to you soon",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Something went wrong!" });
   }
 };

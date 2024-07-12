@@ -10,6 +10,7 @@ const {
   updateActivateTask,
   updateTask,
   postCreateClient,
+  getInterestedClients,
   //   createTask,
   //   deleteTask,
 } = require("../../controllers/admin");
@@ -33,6 +34,8 @@ router.post("/updateActivateTask/:taskId", auth("ADMIN"), updateActivateTask);
 router.put("/updateTask/:taskId", auth("ADMIN"), updateTask);
 
 router.post("/createClient", auth("ADMIN"), postCreateClient);
+
+router.get("/getInterestedClients", auth("ADMIN"), getInterestedClients);
 
 // router.get("/email", async (req, res) => {
 //   await sendEmail({
