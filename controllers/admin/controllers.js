@@ -191,9 +191,10 @@ exports.updateTaskStatus = async (req, res) => {
 };
 
 /* @desc:  Updates the isActive of a task in the database. */
-// @route: PUT /api/admin/updateActivateTask/:taskId
+// @route: POST /api/admin/updateActivateTask/:taskId
 exports.updateActivateTask = async (req, res) => {
   const { taskId } = req.params;
+  const { suggestedBidders } = req.body;
   try {
     const task = await Task.findOne({ id: taskId }).select("-_id");
     if (!task) {
@@ -201,7 +202,7 @@ exports.updateActivateTask = async (req, res) => {
     }
     await Task.updateOne(
       { id: taskId },
-      { $set: { isActive: true, activationDate: new Date() } }
+      { $set: { isActive: true, suggestedBidders, activationDate: new Date() } }
     );
     return res.status(200).json({ message: "Task activated successfully" });
   } catch (err) {
