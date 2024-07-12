@@ -1,5 +1,5 @@
 const { getDatabase } = require("firebase-admin/database");
-// const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer");
 const { compactUUID } = require("../utils/stringUtils");
 const { NOTIFICATION_CONFIG } = require("./config");
 require("dotenv").config();
@@ -30,31 +30,30 @@ exports.createNotification = ({
   }
 };
 
-// exports.sendEmail = async ({ to, subject, text, html }) => {
-//   let transporter = nodemailer.createTransport({
-//     host: process.env.SENDER_HOST,
-//     port: process.env.SENDER_PORT,
-//     secure: false,
-//     auth: {
-//       user: process.env.SENDER_EMAIL,
-//       pass: process.env.SENDER_PASSWORD,
-//     },
-//   });
+exports.sendEmail = async ({ to, subject, text, html }) => {
+  let transporter = nodemailer.createTransport({
+    host: process.env.SENDER_HOST,
+    port: process.env.SENDER_PORT,
+    secure: false,
+    auth: {
+      user: process.env.SENDER_EMAIL,
+      pass: process.env.SENDER_PASSWORD,
+    },
+  });
 
-//   let mailOptions = {
-//     from: process.env.SENDER_EMAIL,
-//     to,
-//     subject,
-//     text,
-//     html,
-//   };
+  let mailOptions = {
+    from: process.env.SENDER_EMAIL,
+    to,
+    subject,
+    text,
+    html,
+  };
 
-//   try {
-//     let info = await transporter.sendMail(mailOptions);
-//     console.log("Message sent: %s", info.messageId);
-//     return info;
-//   } catch (error) {
-//     console.error("Error sending email:", error);
-//     throw error;
-//   }
-// };
+  try {
+    let info = await transporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
+};
