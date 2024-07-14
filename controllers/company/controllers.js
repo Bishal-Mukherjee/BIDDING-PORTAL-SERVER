@@ -35,6 +35,10 @@ exports.getTasks = async (req, res) => {
             activationDate: { $gte: seventyTwoHoursAgo },
             assignedTo: null,
             id: { $nin: previouslyRejectedTaskIds },
+            $or: [
+              { suggestedBidders: { $size: 0 } },
+              { suggestedBidders: email },
+            ],
           },
         },
         {

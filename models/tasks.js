@@ -55,6 +55,10 @@ const taskSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
+  suggestedBidders: {
+    type: [String],
+    default: [],
+  },
   assignedTo: {
     type: String,
   },

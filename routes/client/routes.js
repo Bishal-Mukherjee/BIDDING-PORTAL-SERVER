@@ -6,6 +6,7 @@ const {
   //   createTask,
   deleteTask,
   updateTask,
+  registerInterestedClient,
 } = require("../../controllers/client");
 const { auth } = require("../../middlewares/auth");
 
@@ -18,5 +19,7 @@ router.get("/getTask/:taskId", auth("CLIENT"), getTaskById);
 router.delete("/deleteTask/:taskId", auth("CLIENT"), deleteTask);
 
 router.put("/updateTask/:taskId", auth("CLIENT"), updateTask);
+
+router.post("/postInterestedClient", registerInterestedClient);
 
 module.exports = router;

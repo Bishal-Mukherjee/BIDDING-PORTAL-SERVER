@@ -1,6 +1,7 @@
 const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
+const InterestedClients = require("../../models/interested-clients");
 const { auth } = require("firebase-admin");
 const { compactUUID } = require("../../utils/stringUtils");
 
@@ -191,9 +192,10 @@ exports.updateTaskStatus = async (req, res) => {
 };
 
 /* @desc:  Updates the isActive of a task in the database. */
-// @route: PUT /api/admin/updateActivateTask/:taskId
+// @route: POST /api/admin/updateActivateTask/:taskId
 exports.updateActivateTask = async (req, res) => {
   const { taskId } = req.params;
+  const { suggestedBidders } = req.body;
   try {
     const task = await Task.findOne({ id: taskId }).select("-_id");
     if (!task) {
@@ -201,7 +203,7 @@ exports.updateActivateTask = async (req, res) => {
     }
     await Task.updateOne(
       { id: taskId },
-      { $set: { isActive: true, activationDate: new Date() } }
+      { $set: { isActive: true, suggestedBidders, activationDate: new Date() } }
     );
     return res.status(200).json({ message: "Task activated successfully" });
   } catch (err) {
@@ -266,5 +268,20 @@ exports.postCreateClient = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to create user" });
+  }
+};
+
+/* desc: Retrieves all interested clients */
+// route: GET /api/admin/getInterestedClients
+exports.getInterestedClients = async (req, res) => {
+  try {
+    const clients = await InterestedClients.find().select("-_id");
+    if (!clients) {
+      return res.status(404).json({ message: "Interested clients not found" });
+    }
+    return res.status(200).json(clients);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Something went wrong!" });
   }
 };
