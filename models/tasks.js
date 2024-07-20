@@ -60,7 +60,10 @@ const taskSchema = new mongoose.Schema({
     default: [],
   },
   assignedTo: {
-    type: String,
+    type: {
+      name: String,
+      email: String,
+    },
   },
 });
 

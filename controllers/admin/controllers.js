@@ -239,7 +239,12 @@ exports.updateSelectBid = async (req, res) => {
 
       await Task.updateOne(
         { id: taskId },
-        { $set: { assignedTo: bid.bidder.name, status: "assigned" } }
+        {
+          $set: {
+            assignedTo: { name: bid.bidder.name, email: bid.bidder.email },
+            status: "assigned",
+          },
+        }
       );
 
       return res.status(200).json({ message: "Bid selected successfully" });
