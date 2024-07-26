@@ -1,7 +1,11 @@
 const { getDatabase } = require("firebase-admin/database");
 const nodemailer = require("nodemailer");
+const handlebars = require("handlebars");
+const path = require("path");
+const fs = require("fs");
 const { compactUUID } = require("../utils/stringUtils");
 const { NOTIFICATION_CONFIG } = require("./config");
+const { actionMap } = require("./actionMap");
 require("dotenv").config();
 
 exports.createNotification = ({
@@ -30,8 +34,13 @@ exports.createNotification = ({
   }
 };
 
-exports.sendEmail = async ({ to, subject, text, html }) => {
-  let transporter = nodemailer.createTransport({
+exports.sendEmail = async ({ to, action, context }) => {
+  if (!action || !to || !context) {
+    console.log("parameters missing");
+    return;
+  }
+
+  const transporter = nodemailer.createTransport({
     host: process.env.SENDER_HOST,
     port: process.env.SENDER_PORT,
     secure: false,
@@ -41,16 +50,23 @@ exports.sendEmail = async ({ to, subject, text, html }) => {
     },
   });
 
-  let mailOptions = {
+  const subject = actionMap[action].subject;
+  const templatePath = actionMap[action].path;
+
+  const template = path.resolve(__dirname, templatePath);
+  const content = fs.readFileSync(template, "utf-8");
+  const compiledTemplate = handlebars.compile(content);
+  const html = compiledTemplate(context);
+
+  const mailOptions = {
     from: process.env.SENDER_EMAIL,
     to,
     subject,
-    text,
     html,
   };
 
   try {
-    let info = await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
     return info;
   } catch (error) {
     console.error("Error sending email:", error);
