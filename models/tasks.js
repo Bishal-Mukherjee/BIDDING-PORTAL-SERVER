@@ -51,7 +51,7 @@ const taskSchema = new mongoose.Schema({
     type: [String],
     default: [],
   },
-  videos: {
+  attachments: {
     type: [String],
     default: [],
   },

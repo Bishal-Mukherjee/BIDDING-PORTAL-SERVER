@@ -4,6 +4,7 @@ const Bid = require("../../models/bids");
 const InterestedClients = require("../../models/interested-clients");
 const { auth } = require("firebase-admin");
 const { compactUUID } = require("../../utils/stringUtils");
+const { sendEmail } = require("../../notification/controller");
 
 /* @desc:  Retrieves all tasks from the database and returns
    them in a sorted order based on creation date. */
@@ -86,7 +87,7 @@ exports.getRecentTasks = async (req, res) => {
 
 /* desc: Creates a new task */
 // route: POST /api/admin/createTask
-// body: { firstName, lastName, email, title, description, images, videos,address }
+// body: { firstName, lastName, email, title, description, images, attachments, address }
 exports.createTask = async (req, res) => {
   const {
     firstName,
@@ -96,7 +97,7 @@ exports.createTask = async (req, res) => {
     description,
     address,
     images,
-    videos,
+    attachments,
   } = req.body;
 
   if (!title || !address) {
@@ -115,7 +116,7 @@ exports.createTask = async (req, res) => {
       email,
       address,
       images,
-      videos,
+      attachments,
     });
 
     await task.save();
@@ -288,5 +289,20 @@ exports.getInterestedClients = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Something went wrong!" });
+  }
+};
+
+/* desc: Sends email to interested clients */
+// route: POST /api/admin/email/:action
+exports.postSendEmail = async (req, res) => {
+  const { action } = req.params;
+  const { email, context } = req.body;
+
+  try {
+    await sendEmail({ action, to: email, context });
+    return res.status(200).json({ message: "Email sent successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to send email" });
   }
 };

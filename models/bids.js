@@ -33,6 +33,7 @@ const bidSchema = new mongoose.Schema({
     type: {
       name: { type: String },
       email: { type: String },
+      logo: { type: String },
     },
   },
   status: {
