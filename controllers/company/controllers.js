@@ -72,7 +72,7 @@ exports.getTasks = async (req, res) => {
         { $sort: { createdAt: -1 } },
         { $project: { _id: 0, email: 0, name: 0, __v: 0, bid: 0 } },
       ]).exec();
-    } else if (status === "accepted") {
+    } else if (status === "assigned") {
       // can also add ' status === "rejected" ' if needed
       const acceptedTasksDoc = await TaskAcceptance.aggregate([
         { $match: { company: email, status } },
