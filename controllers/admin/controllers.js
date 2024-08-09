@@ -310,3 +310,20 @@ exports.postSendEmail = async (req, res) => {
     return res.status(500).json({ message: "Failed to send email" });
   }
 };
+
+/* desc: Clears all tasks related to a user */
+// route: POST /api/admin/clearUserRelatedTasks/:email
+exports.clearUserRelatedTasks = async (req, res) => {
+  const { email } = req.params;
+  try {
+    await Task.deleteMany({ email: { email } });
+    return res
+      .status(200)
+      .json({ message: "User related tasks cleared successfully" });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "Failed to clear user related tasks" });
+  }
+};

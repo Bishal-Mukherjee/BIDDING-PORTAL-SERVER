@@ -75,7 +75,7 @@ exports.getTasks = async (req, res) => {
     } else if (status === "assigned") {
       // can also add ' status === "rejected" ' if needed
       const acceptedTasksDoc = await TaskAcceptance.aggregate([
-        { $match: { company: email, status } },
+        { $match: { company: email, status: "accepted" } },
         { $project: { _id: 0, taskId: 1, status: 1 } },
       ]).exec();
       if (acceptedTasksDoc) {
@@ -83,7 +83,7 @@ exports.getTasks = async (req, res) => {
         // query for the tasks which the company has accepted to bid
         // and also the tasks should not be assigned to any one
         tasks = await Task.aggregate([
-          { $match: { id: { $in: ids }, assignedTo: null, status: "created" } },
+          { $match: { id: { $in: ids } } },
           {
             $addFields: {
               previewImage: {
@@ -222,7 +222,7 @@ exports.createBid = async (req, res) => {
       id,
       taskId,
       amount,
-	  estimatedCompletionDays,
+      estimatedCompletionDays,
       attachment,
       quality,
       bidder: {
