@@ -29,6 +29,11 @@ const bidSchema = new mongoose.Schema({
     enum: ["good", "better", "best"],
     default: "good",
   },
+  estimatedCompletionDays: {
+    type: Number,
+    required: true,
+    min: 0,
+  },
   bidder: {
     type: {
       name: { type: String },

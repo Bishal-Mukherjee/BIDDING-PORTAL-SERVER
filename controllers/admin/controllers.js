@@ -135,7 +135,7 @@ exports.createTask = async (req, res) => {
 // body: { title, description, images }
 exports.updateTask = async (req, res) => {
   const { taskId } = req.params;
-  const { title, description, images } = req.body;
+  const { title, description, images, attachments } = req.body;
 
   try {
     const task = await Task.findOne({ id: taskId });
@@ -152,6 +152,10 @@ exports.updateTask = async (req, res) => {
 
       if (images && images.length > 0) {
         updateFields.images = images;
+      }
+
+      if (attachments && attachments.length > 0) {
+        updateFields.attachments = attachments;
       }
 
       if (Object.keys(updateFields).length > 0) {
