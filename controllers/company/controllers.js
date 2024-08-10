@@ -9,7 +9,7 @@ const { NOTIFICATION_TYPE } = require("../../notification/config");
 /* @desc:  Retrieves tasks based on status. */
 // @route: GET /api/company/getTasks?status="created"|"assigned"|"in-progress"|"completed"
 exports.getTasks = async (req, res) => {
-  const { email, firstName, lastName } = req.user;
+  const { email } = req.user;
   const { status = "created" } = req.query; // status can be 'assigned' / 'in-progress' / 'completed'
   let tasks = [];
 
@@ -101,9 +101,8 @@ exports.getTasks = async (req, res) => {
       }
     } else {
       // gets all tasks assigned to the company
-      const name = `${firstName} ${lastName}`;
       tasks = await Task.aggregate([
-        { $match: { assignedTo: name, status } },
+        { $match: { "assignedTo.email": email, status } },
         {
           $addFields: {
             previewImage: {

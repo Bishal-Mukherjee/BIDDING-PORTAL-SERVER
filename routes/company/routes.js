@@ -16,7 +16,7 @@ router.get("/getTask/:taskId", auth("COMPANY"), getTaskById);
 
 router.post("/createBid/:taskId", auth("COMPANY"), createBid);
 
-router.put("/makeInProgress/:taskId", auth("COMPANY"), markInProgress);
+router.put("/updateTaskStatus/:taskId", auth("COMPANY"), markInProgress);
 
 router.put(
   "/acceptOrRejectTask/:taskId",
