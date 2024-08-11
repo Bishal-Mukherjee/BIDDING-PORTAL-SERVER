@@ -1,7 +1,6 @@
 const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
-const InterestedClients = require("../../models/interested-clients");
 const { auth } = require("firebase-admin");
 const { compactUUID } = require("../../utils/stringUtils");
 const { sendEmail } = require("../../notification/controller");
@@ -278,21 +277,6 @@ exports.postCreateClient = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to create user" });
-  }
-};
-
-/* desc: Retrieves all interested clients */
-// route: GET /api/admin/getInterestedClients
-exports.getInterestedClients = async (req, res) => {
-  try {
-    const clients = await InterestedClients.find().select("-_id");
-    if (!clients) {
-      return res.status(404).json({ message: "Interested clients not found" });
-    }
-    return res.status(200).json(clients);
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Something went wrong!" });
   }
 };
 

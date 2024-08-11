@@ -10,7 +10,6 @@ const {
   updateActivateTask,
   updateTask,
   postCreateClient,
-  getInterestedClients,
   clearUserRelatedTasks,
   //   postSendEmail,
   //   createTask,
@@ -35,8 +34,6 @@ router.post("/updateActivateTask/:taskId", auth("ADMIN"), updateActivateTask);
 router.put("/updateTask/:taskId", auth("ADMIN"), updateTask);
 
 router.post("/createClient", auth("ADMIN"), postCreateClient);
-
-router.get("/getInterestedClients", auth("ADMIN"), getInterestedClients);
 
 router.delete(
   "/clearUserRelatedTasks/:email",
