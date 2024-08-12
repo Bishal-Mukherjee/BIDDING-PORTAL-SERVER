@@ -1,6 +1,7 @@
 const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
+const TaskAcceptance = require("../../models/task-acceptance");
 const { auth } = require("firebase-admin");
 const { compactUUID } = require("../../utils/stringUtils");
 const { sendEmail } = require("../../notification/controller");
@@ -309,5 +310,22 @@ exports.clearUserRelatedTasks = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Failed to clear user related tasks" });
+  }
+};
+
+exports.clearCompanyRelatedDetails = async (req, res) => {
+  const { email } = req.params;
+  try {
+    await Bid.deleteMany({ "bidder.email": email });
+    await TaskAcceptance.deleteMany({ company: email });
+
+    return res
+      .status(200)
+      .json({ message: "Company related details cleared successfully" });
+  } catch (err) {
+    console.log(err);
+    return res
+      .status(500)
+      .json({ message: "Failed to clear company related details" });
   }
 };

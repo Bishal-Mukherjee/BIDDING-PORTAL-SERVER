@@ -11,6 +11,7 @@ const {
   updateTask,
   postCreateClient,
   clearUserRelatedTasks,
+  clearCompanyRelatedDetails,
   //   postSendEmail,
   //   createTask,
   //   deleteTask,
@@ -39,6 +40,12 @@ router.delete(
   "/clearUserRelatedTasks/:email",
   auth("ADMIN"),
   clearUserRelatedTasks
+);
+
+router.delete(
+  "/clearCompanyRelatedDetails/:email",
+  auth("ADMIN"),
+  clearCompanyRelatedDetails
 );
 
 // router.post("/email/:action", auth("ADMIN"), postSendEmail);
