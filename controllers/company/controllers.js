@@ -202,7 +202,7 @@ exports.markInProgress = async (req, res) => {
 // body: { amount }
 exports.createBid = async (req, res) => {
   const { taskId } = req.params;
-  const { firstName, lastName, email } = req.user;
+  const { firstName, email } = req.user;
   const { amount, attachment, estimatedCompletionDays, quality, logo } =
     req.body;
   const id = compactUUID();
@@ -225,7 +225,7 @@ exports.createBid = async (req, res) => {
       attachment,
       quality,
       bidder: {
-        name: `${firstName} ${lastName}`,
+        name: firstName,
         email,
         logo,
       },
@@ -236,7 +236,7 @@ exports.createBid = async (req, res) => {
     // create notification for admin
     createNotification({
       type: NOTIFICATION_TYPE.BID_PLACED,
-      title: `${firstName} ${lastName}`,
+      title: firstName,
       resourceId: taskId,
     });
     return res.status(200).json({ bid });
