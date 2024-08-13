@@ -2,7 +2,6 @@ const dayjs = require("dayjs");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
-const { auth } = require("firebase-admin");
 const { compactUUID } = require("../../utils/stringUtils");
 const { sendEmail } = require("../../notification/controller");
 
@@ -120,6 +119,12 @@ exports.createTask = async (req, res) => {
     });
 
     await task.save();
+    await sendEmail({
+      action: "new-task",
+      to: email,
+      context: { name: `${firstName} ${lastName}`, taskId: id },
+    });
+
     return res.status(201).json({
       message: "Task created successfully",
       taskId: id,
@@ -203,13 +208,22 @@ exports.updateActivateTask = async (req, res) => {
   const { suggestedBidders } = req.body;
   try {
     const task = await Task.findOne({ id: taskId }).select("-_id");
+
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
     await Task.updateOne(
       { id: taskId },
       { $set: { isActive: true, suggestedBidders, activationDate: new Date() } }
     );
+
+    await sendEmail({
+      action: "task-activated",
+      to: task.email,
+      context: { name: `${task.firstName} ${task.lastName}`, taskId },
+    });
+
     return res.status(200).json({ message: "Task activated successfully" });
   } catch (err) {
     console.log(err);
@@ -251,6 +265,18 @@ exports.updateSelectBid = async (req, res) => {
           },
         }
       );
+
+      await sendEmail({
+        action: "task-assigned",
+        to: bid.bidder.email,
+        context: {
+          taskId,
+          name: bid.bidder.name,
+          amount: `${bid.amount} ${bid.currency}`,
+          quality: bid.quality,
+          attachment: bid.attachment,
+        },
+      });
 
       return res.status(200).json({ message: "Bid selected successfully" });
     }
