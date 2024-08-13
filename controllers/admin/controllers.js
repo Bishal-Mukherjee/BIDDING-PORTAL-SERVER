@@ -261,25 +261,25 @@ exports.updateSelectBid = async (req, res) => {
   }
 };
 
-exports.postCreateClient = async (req, res) => {
-  const { email, password, firstName, lastName, phoneNumber } = req.body;
+// exports.postCreateClient = async (req, res) => {
+//   const { email, password, firstName, lastName, phoneNumber } = req.body;
 
-  try {
-    const userData = {
-      email,
-      password,
-      firstName,
-      lastName,
-      phoneNumber,
-      designation: "CLIENT",
-    };
-    await auth().createUser(userData);
-    return res.status(200).json({ message: "User created successfully" });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Failed to create user" });
-  }
-};
+//   try {
+//     const userData = {
+//       email,
+//       password,
+//       firstName,
+//       lastName,
+//       phoneNumber,
+//       designation: "CLIENT",
+//     };
+//     await auth().createUser(userData);
+//     return res.status(200).json({ message: "User created successfully" });
+//   } catch (err) {
+//     console.log(err);
+//     return res.status(500).json({ message: "Failed to create user" });
+//   }
+// };
 
 /* desc: Sends email to interested clients */
 // route: POST /api/admin/email/:action
@@ -296,36 +296,93 @@ exports.postSendEmail = async (req, res) => {
   }
 };
 
-/* desc: Clears all tasks related to a user */
-// route: POST /api/admin/clearUserRelatedTasks/:email
-exports.clearUserRelatedTasks = async (req, res) => {
+/* desc: Clears all tasks related to a client */
+// route: DELETE /api/admin/disassociateClient/:email
+exports.disassociateClient = async (req, res) => {
   const { email } = req.params;
+
   try {
-    await Task.deleteMany({ email: { email } });
+    const hasActiveTask = await Task.findOne({
+      email,
+      $or: [
+        { status: "created" },
+        { status: "assigned" },
+        { status: "in-progress" },
+      ],
+    });
+
+    if (hasActiveTask) {
+      return res.status(400).json({
+        message:
+          "Client cannot be disassociated while it has open or active tasks",
+      });
+    }
+
+    await Task.deleteMany({ email });
+
     return res
       .status(200)
-      .json({ message: "User related tasks cleared successfully" });
+      .json({ message: "Client related tasks cleared successfully" });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res
       .status(500)
-      .json({ message: "Failed to clear user related tasks" });
+      .json({ message: "Failed to clear client related tasks" });
   }
 };
 
-exports.clearCompanyRelatedDetails = async (req, res) => {
+/* desc: Clears all tasks, bids related to a company */
+// route: DELETE /api/admin/disassociateCompany/:email
+exports.disassociateCompany = async (req, res) => {
   const { email } = req.params;
+
   try {
-    await Bid.deleteMany({ "bidder.email": email });
-    await TaskAcceptance.deleteMany({ company: email });
+    const hasActiveTask = await Task.findOne({
+      "assignedTo.email": email,
+      $or: [{ status: "in-progress" }, { status: { $exists: true } }],
+    });
+
+    if (hasActiveTask) {
+      return res.status(400).json({
+        message:
+          "Company cannot be disassociated while it has active or assigned tasks",
+      });
+    }
+
+    await Promise.all([
+      Bid.deleteMany({ "bidder.email": email }),
+      TaskAcceptance.deleteMany({ company: email }),
+    ]);
 
     return res
       .status(200)
       .json({ message: "Company related details cleared successfully" });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res
       .status(500)
       .json({ message: "Failed to clear company related details" });
+  }
+};
+
+exports.unassignTask = async (req, res) => {
+  const { taskId } = req.params;
+
+  try {
+    const task = await Task.findOne({ id: taskId });
+
+    if (!task) return res.status(404).json({ message: "Task not found" });
+
+    await Task.updateOne(
+      { id: taskId },
+      { $set: { status: "created", assignedTo: null } }
+    );
+
+    await Bid.updateMany({ taskId: taskId }, { $set: { status: "pending" } });
+
+    return res.status(200).json({ message: "Task status reset successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to reset task status" });
   }
 };

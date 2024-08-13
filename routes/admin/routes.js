@@ -9,9 +9,9 @@ const {
   updateSelectBid,
   updateActivateTask,
   updateTask,
-  postCreateClient,
-  clearUserRelatedTasks,
-  clearCompanyRelatedDetails,
+  disassociateClient,
+  disassociateCompany,
+  unassignTask
   //   postSendEmail,
   //   createTask,
   //   deleteTask,
@@ -34,19 +34,15 @@ router.post("/updateActivateTask/:taskId", auth("ADMIN"), updateActivateTask);
 
 router.put("/updateTask/:taskId", auth("ADMIN"), updateTask);
 
-router.post("/createClient", auth("ADMIN"), postCreateClient);
+router.delete("/disassociateClient/:email", auth("ADMIN"), disassociateClient);
 
 router.delete(
-  "/clearUserRelatedTasks/:email",
+  "/disassociateCompany/:email",
   auth("ADMIN"),
-  clearUserRelatedTasks
+  disassociateCompany
 );
 
-router.delete(
-  "/clearCompanyRelatedDetails/:email",
-  auth("ADMIN"),
-  clearCompanyRelatedDetails
-);
+router.put("/unassignTask/:taskId", auth("ADMIN"), unassignTask);
 
 // router.post("/email/:action", auth("ADMIN"), postSendEmail);
 
