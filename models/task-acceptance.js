@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Status } = require("../constants");
 
 const taskAcceptanceSchema = new mongoose.Schema({
   company: {
@@ -11,7 +12,7 @@ const taskAcceptanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["accepted", "rejected"],
+    enum: [Status.ACCEPTED, Status.REJECTED],
   },
   createdAt: {
     type: Date,

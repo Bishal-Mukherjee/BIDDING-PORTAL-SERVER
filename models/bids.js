@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Status, Quality, CURRENCY } = require("../constants");
 
 const bidSchema = new mongoose.Schema({
   id: {
@@ -22,12 +23,12 @@ const bidSchema = new mongoose.Schema({
   currency: {
     type: String,
     required: true,
-    default: "USD",
+    default: CURRENCY,
   },
   quality: {
     type: String,
-    enum: ["good", "better", "best"],
-    default: "good",
+    enum: [Quality.GOOD, Quality.BETTER, Quality.BEST],
+    default: Quality.GOOD,
   },
   estimatedCompletionDays: {
     type: Number,
@@ -43,8 +44,8 @@ const bidSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "accepted", "rejected"],
-    default: "pending",
+    enum: [Status.PENDING, Status.ACCEPTED, Status.REJECTED],
+    default: Status.PENDING,
   },
   createdAt: {
     type: Date,

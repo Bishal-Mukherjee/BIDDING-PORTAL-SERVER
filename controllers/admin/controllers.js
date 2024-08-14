@@ -4,12 +4,13 @@ const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
 const { compactUUID } = require("../../utils/stringUtils");
 const { sendEmail } = require("../../notification/controller");
+const { Status } = require("../../constants");
 
 /* @desc:  Retrieves all tasks from the database and returns
    them in a sorted order based on creation date. */
 // @route: GET /api/admin/getAllTask
 exports.getAllTask = async (req, res) => {
-  const { status = "created" } = req.query;
+  const { status = Status.CREATED } = req.query;
 
   try {
     const tasks = await Task.aggregate([
@@ -110,7 +111,7 @@ exports.createTask = async (req, res) => {
       id,
       title,
       description,
-      status: "created",
+      status: Status.CREATED,
       name: `${firstName} ${lastName}`,
       email,
       address,
@@ -331,9 +332,9 @@ exports.disassociateClient = async (req, res) => {
     const hasActiveTask = await Task.findOne({
       email,
       $or: [
-        { status: "created" },
-        { status: "assigned" },
-        { status: "in-progress" },
+        { status: Status.CREATED },
+        { status: Status.ASSIGNED },
+        { status: Status.IN_PROGRESS },
       ],
     });
 
@@ -401,10 +402,13 @@ exports.unassignTask = async (req, res) => {
 
     await Task.updateOne(
       { id: taskId },
-      { $set: { status: "created", assignedTo: null } }
+      { $set: { status: Status.CREATED, assignedTo: null } }
     );
 
-    await Bid.updateMany({ taskId: taskId }, { $set: { status: "pending" } });
+    await Bid.updateMany(
+      { taskId: taskId },
+      { $set: { status: Status.PENDING } }
+    );
 
     return res.status(200).json({ message: "Task status reset successfully" });
   } catch (err) {
