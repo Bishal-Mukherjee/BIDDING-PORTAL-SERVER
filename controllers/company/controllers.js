@@ -5,21 +5,22 @@ const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
 const { createNotification } = require("../../notification/controller");
 const { NOTIFICATION_TYPE } = require("../../notification/config");
+const { Status } = require("../../constants");
 
 /* @desc:  Retrieves tasks based on status. */
 // @route: GET /api/company/getTasks?status="created"|"assigned"|"in-progress"|"completed"
 exports.getTasks = async (req, res) => {
   const { email } = req.user;
-  const { status = "created" } = req.query; // status can be 'assigned' / 'in-progress' / 'completed'
+  const { status = Status.CREATED } = req.query; // status can be 'assigned' / 'in-progress' / 'completed'
   let tasks = [];
 
   try {
-    if (status === "created") {
+    if (status === Status.CREATED) {
       // gets those tasks that are activated in the last 72 hours, where no bids have been placed
       const seventyTwoHoursAgo = dayjs().subtract(72, "hour").toDate();
 
       const rejectedTaskIds = await TaskAcceptance.aggregate([
-        { $match: { company: email, status: "rejected" } },
+        { $match: { company: email, status: Status.REJECTED } },
         { $project: { _id: 0, taskId: 1, status: 1 } },
       ]).exec();
 
@@ -72,10 +73,10 @@ exports.getTasks = async (req, res) => {
         { $sort: { createdAt: -1 } },
         { $project: { _id: 0, email: 0, name: 0, __v: 0, bid: 0 } },
       ]).exec();
-    } else if (status === "assigned") {
+    } else if (status === Status.ASSIGNED) {
       // can also add ' status === "rejected" ' if needed
       const acceptedTasksDoc = await TaskAcceptance.aggregate([
-        { $match: { company: email, status: "accepted" } },
+        { $match: { company: email, status: Status.ACCEPTED } },
         { $project: { _id: 0, taskId: 1, status: 1 } },
       ]).exec();
       if (acceptedTasksDoc) {
@@ -187,7 +188,10 @@ exports.markInProgress = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    await Task.updateOne({ id: taskId }, { $set: { status: "in-progress" } });
+    await Task.updateOne(
+      { id: taskId },
+      { $set: { status: Status.IN_PROGRESS } }
+    );
     return res
       .status(200)
       .json({ message: "Task status updated successfully" });
@@ -213,7 +217,7 @@ exports.createBid = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
-    if (task.status !== "created") {
+    if (task.status !== Status.CREATED) {
       return res.status(400).json({ message: "Task already assigned" });
     }
 
@@ -224,11 +228,7 @@ exports.createBid = async (req, res) => {
       estimatedCompletionDays,
       attachment,
       quality,
-      bidder: {
-        name: firstName,
-        email,
-        logo,
-      },
+      bidder: { name: firstName, email, logo },
     });
 
     await bid.save();
@@ -270,7 +270,7 @@ exports.getTaskAcceptances = async (req, res) => {
       {
         $match: {
           company: email,
-          status: "accepted",
+          status: Status.ACCEPTED,
           createdAt: { $gte: seventyTwoHoursAgo },
         },
       },
