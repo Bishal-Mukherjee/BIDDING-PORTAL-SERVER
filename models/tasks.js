@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { Status } = require("../constants");
 
 const taskSchema = new mongoose.Schema({
   id: {
@@ -15,8 +16,13 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["created", "assigned", "in-progress", "completed"],
-    default: "created",
+    enum: [
+      Status.CREATED,
+      Status.ASSIGNED,
+      Status.IN_PROGRESS,
+      Status.COMPLETED,
+    ],
+    default: Status.CREATED,
   },
   isActive: {
     type: Boolean,
