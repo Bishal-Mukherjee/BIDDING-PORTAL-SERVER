@@ -44,7 +44,7 @@ router.delete(
 
 router.put("/unassignTask/:taskId", auth("ADMIN"), unassignTask);
 
-router.post("/email/:action", auth("ADMIN"), postSendEmail);
+router.post("/email/:action", postSendEmail);
 
 // router.post("/createTask", auth("CLIENT"), createTask);
 
