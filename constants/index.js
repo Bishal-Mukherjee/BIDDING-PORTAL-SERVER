@@ -16,4 +16,6 @@ const Quality = {
 
 const CURRENCY = "USD";
 
-module.exports = { Status, Quality, CURRENCY };
+const ADMIN_EMAIL = "info@hvacnegotiators.com";
+
+module.exports = { Status, Quality, CURRENCY, ADMIN_EMAIL };
