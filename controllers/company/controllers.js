@@ -3,9 +3,12 @@ const { compactUUID } = require("../../utils/stringUtils");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
-const { createNotification } = require("../../notification/controller");
+const {
+  createNotification,
+  sendEmail,
+} = require("../../notification/controller");
 const { NOTIFICATION_TYPE } = require("../../notification/config");
-const { Status } = require("../../constants");
+const { Status, ADMIN_EMAIL } = require("../../constants");
 
 /* @desc:  Retrieves tasks based on status. */
 // @route: GET /api/company/getTasks?status="created"|"assigned"|"in-progress"|"completed"
@@ -182,16 +185,26 @@ exports.postAcceptOrRejectTask = async (req, res) => {
 // @route: PUT /api/company/makeInProgress/:taskId
 exports.markInProgress = async (req, res) => {
   const { taskId } = req.params;
+  const { firstName } = req.user;
 
   try {
     const task = await Task.findOne({ id: taskId }).select("-_id");
+
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
     await Task.updateOne(
       { id: taskId },
       { $set: { status: Status.IN_PROGRESS } }
     );
+
+    await sendEmail({
+      action: "company-task-in-progress",
+      to: [ADMIN_EMAIL],
+      context: { companyName: firstName, taskId },
+    });
+
     return res
       .status(200)
       .json({ message: "Task status updated successfully" });

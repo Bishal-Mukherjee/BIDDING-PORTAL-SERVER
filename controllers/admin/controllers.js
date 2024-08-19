@@ -120,9 +120,10 @@ exports.createTask = async (req, res) => {
     });
 
     await task.save();
+
     await sendEmail({
       action: "new-task",
-      to: email,
+      to: [email],
       context: { name: `${firstName} ${lastName}`, taskId: id },
     });
 
@@ -220,9 +221,15 @@ exports.updateActivateTask = async (req, res) => {
     );
 
     await sendEmail({
-      action: "task-activated",
-      to: task.email,
+      action: "client-task-activated",
+      to: [task.email],
       context: { name: `${task.firstName} ${task.lastName}`, taskId },
+    });
+
+    await sendEmail({
+      action: "company-task-activated",
+      to: suggestedBidders,
+      context: { taskId },
     });
 
     return res.status(200).json({ message: "Task activated successfully" });
@@ -269,7 +276,7 @@ exports.updateSelectBid = async (req, res) => {
 
       await sendEmail({
         action: "task-assigned",
-        to: bid.bidder.email,
+        to: [bid.bidder.email],
         context: {
           taskId,
           name: bid.bidder.name,
@@ -312,10 +319,10 @@ exports.updateSelectBid = async (req, res) => {
 // route: POST /api/admin/email/:action
 exports.postSendEmail = async (req, res) => {
   const { action } = req.params;
-  const { email, context } = req.body;
+  const { emails, context } = req.body;
 
   try {
-    await sendEmail({ action, to: email, context });
+    await sendEmail({ action, to: emails, context });
     return res.status(200).json({ message: "Email sent successfully" });
   } catch (err) {
     console.log(err);

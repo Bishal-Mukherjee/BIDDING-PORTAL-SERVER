@@ -60,13 +60,16 @@ exports.sendEmail = async ({ to, action, context }) => {
 
   const mailOptions = {
     from: process.env.SENDER_EMAIL,
-    to,
     subject,
     html,
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
+    const info = await Promise.all(
+      to.map((recipient) =>
+        transporter.sendMail({ ...mailOptions, to: recipient })
+      )
+    );
     return info;
   } catch (error) {
     console.error("Error sending email:", error);

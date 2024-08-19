@@ -95,37 +95,13 @@
                 text-align: justify;
               "
             >
-              Hey
-              {{name}}, your bid of amount
-              <b> {{amount}} </b>, of quality
-              <b> {{quality}} </b>
-              with regards to the task
+              Hey, the task
               <a
-                href="https://hvacbidding.vercel.app/company/analytics/{{taskId}}"
+                href="https://hvacbidding.vercel.app/admin/analytics/{{taskId}}"
                 target="_blank"
               >#{{taskId}}</a>
-              has been accepted and the task is assigned to you. Please click on
-              the
-              <a href={{attachment}} target="_blank">link</a>
-              to view the bid attachment. If you have any questions, reach out
-              to support team at
-              <a
-                href="mailto:info@hvacnegotiators.com"
-                style="color: #7ac142; text-decoration: underline"
-              >info@hvacnegotiators.com</a>
-              <p
-                class="footer"
-                style="
-                  clear: both;
-                  margin-top: 15px;
-                  text-align: flex-start;
-                  width: 100%;
-                "
-              >
-                Best regards,
-                <br />
-                The HVAC Negotiators Team.
-              </p>
+              has been marked as in progress by
+              {{companyName}}.
             </div>
           </div>
         </td>
