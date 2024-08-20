@@ -230,9 +230,15 @@ exports.createBid = async (req, res) => {
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
     }
+
     if (task.status !== Status.CREATED) {
       return res.status(400).json({ message: "Task already assigned" });
     }
+
+    const hasExistingBids = await Bid.findOne({
+      taskId,
+      "bidder.email": email,
+    });
 
     const bid = new Bid({
       id,
@@ -241,7 +247,7 @@ exports.createBid = async (req, res) => {
       estimatedCompletionDays,
       attachment,
       quality,
-      bidder: { name: firstName, email, logo },
+      bidder: { name: firstName, email, ...(hasExistingBids ? {} : { logo }) },
     });
 
     await bid.save();
