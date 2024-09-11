@@ -1,4 +1,5 @@
 const dayjs = require("dayjs");
+const admin = require("firebase-admin");
 const Task = require("../../models/tasks");
 const Bid = require("../../models/bids");
 const TaskAcceptance = require("../../models/task-acceptance");
@@ -421,5 +422,21 @@ exports.unassignTask = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to reset task status" });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await admin.auth().getUserByEmail(email);
+
+	if (!user) return res.status(404).json({ message: "User not found" });
+
+	await admin.auth().deleteUser(user.uid);
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Failed to delete user" });
   }
 };

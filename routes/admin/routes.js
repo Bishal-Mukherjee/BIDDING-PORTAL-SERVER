@@ -13,6 +13,7 @@ const {
   disassociateCompany,
   unassignTask,
   postSendEmail,
+  deleteUser,
   //   createTask,
   //   deleteTask,
 } = require("../../controllers/admin");
@@ -45,6 +46,8 @@ router.delete(
 router.put("/unassignTask/:taskId", auth("ADMIN"), unassignTask);
 
 router.post("/email/:action", postSendEmail);
+
+router.delete("/deleteUser/:email", auth("ADMIN"), deleteUser);
 
 // router.post("/createTask", auth("CLIENT"), createTask);
 
