@@ -87,7 +87,7 @@ exports.getTasks = async (req, res) => {
         // query for the tasks which the company has accepted to bid
         // and also the tasks should not be assigned to any one
         tasks = await Task.aggregate([
-          { $match: { id: { $in: ids } } },
+          { $match: { id: { $in: ids }, status } },
           {
             $addFields: {
               previewImage: {
