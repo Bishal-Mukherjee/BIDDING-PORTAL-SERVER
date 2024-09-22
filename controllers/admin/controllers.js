@@ -374,7 +374,8 @@ exports.disassociateCompany = async (req, res) => {
   try {
     const hasActiveTask = await Task.findOne({
       "assignedTo.email": email,
-      $or: [{ status: "in-progress" }, { status: { $exists: true } }],
+      status: "in-progress",
+      //   $or: [{ status: "in-progress" }, { status: { $exists: true } }],
     });
 
     if (hasActiveTask) {
@@ -430,9 +431,9 @@ exports.deleteUser = async (req, res) => {
   try {
     const user = await admin.auth().getUserByEmail(email);
 
-	if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-	await admin.auth().deleteUser(user.uid);
+    await admin.auth().deleteUser(user.uid);
 
     return res.status(200).json({ message: "User deleted successfully" });
   } catch (err) {
