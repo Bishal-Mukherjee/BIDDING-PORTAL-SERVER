@@ -53,8 +53,8 @@ exports.sendEmail = async ({ to, action, context }) => {
   const subject = actionMap[action].subject;
   const templatePath = actionMap[action].path;
 
-  const resultantPath = path.join(__dirname, templatePath);
-  const template = path.resolve(__dirname, resultantPath);
+  const resultantPath = path.join(process.cwd(), templatePath);
+  const template = path.resolve(process.cwd(), resultantPath);
   const content = fs.readFileSync(template, "utf-8");
   const compiledTemplate = handlebars.compile(content);
   const html = compiledTemplate(context);
